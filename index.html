@@ -18,5 +18,37 @@
         </thead>
         <tbody id="tableBody"></tbody>
     </table>
+    <script>
+        var books = [];
+
+        function init(){
+            const table = document.querySelector("#tableBody");
+            // iterates each book of the list and add to the table
+            books.forEach((book, i) => {
+                addBook(book, i, table);
+            });    
+        }
+
+        function addBook(book, index, table) {
+            // create a row HTML element
+            const row = document.createElement("tr");
+            // add a column of each book attribute to the row
+            addField(book._id, row);
+            addField(book.title, row);
+            addField(book.collection, row);
+            addField(book.author, row);
+            addField(book.publish_year, row);
+            // add the row to the table
+            table.appendChild(row);
+
+        }
+
+        function addField(field, row) { 
+            const column = document.createElement("td");
+            column.innerHTML = field ? field : "-";
+            row.appendChild(column);
+        }
+        init();
+    </script>
 </body>
 </html>
