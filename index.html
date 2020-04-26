@@ -16,7 +16,7 @@
         <!-- Open Modal for create a new book-->
         <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#createModal">Add book</button>
         <!-- List all books -->
-        <table id="tblBooks" style="display: none">
+        <table id="tblBooks">
             <thead>
                 <tr>
                     <th>Id</th>
@@ -35,7 +35,7 @@
             <!-- Modal content -->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 id="actionType"></h1>
+                    <h4>Add Book</h4>
                 </div>
                 <div class="modal-body">
                     <form id="form">
@@ -70,18 +70,21 @@
         </div>
     </div>
     <script>
-        // array to save the books
-        var books = [];
+        // define the server url and data as global
+        var books;
+        const serverURL = "https://ti2-aux-2020.eu-gb.mybluemix.net";
 
         function init(){
-            const table = document.querySelector("#tableBody");            
-            // iterates each book of the list and add to the table
-            books.forEach((book, i) => {
-                addBook(book, i, table);
-            });
+            // const table = document.querySelector("#tableBody");            
+            // // iterates each book of the list and add to the table
+            // books.forEach((book, i) => {
+            //     addBook(book, i, table);
+            // });
 
             var form = document.getElementById("form");
-            form.addEventListener("submit", setBook);            
+            form.addEventListener("submit", setBook);
+
+            updateBookList();         
         }
 
         function addBook(book, index, table) {
@@ -121,7 +124,6 @@
                 
                 // if the form has an _id means that we are updating 
                 const notNew = hasValue(fields['_id'].value);
-                console.log(notNew);
                 
                 // create an object with the form data
                 const book = {
@@ -156,8 +158,6 @@
             fields['publish_year'].value = "";
             // close the form modal
             $("#createModal").modal("hide");
-            // show the list of books
-            $("#tblBooks").show();
         }
 
         function hasValue(value) {
@@ -167,7 +167,6 @@
         function openBookForm(index) {
             // get the book to be updated
             const book = books[index];
-            console.log(book);
             // set the book attributes to the respective form input fields
             const form = document.querySelector("#form");
             form.elements['_id'].value = book._id;
@@ -193,6 +192,26 @@
             const table = document.querySelector("#tableBody");
             // remove the HTML child element (row) from the table by the relative book id
             getRowById(bookId, table).remove();
+        }
+
+        function updateBookList() {
+            // request the books list, so we use:
+            // GET /book
+            fetch(`${serverURL}/book`, { method: "GET" })
+                .then(res => res.json())
+                .then(resBooks => {
+                    // set the received books list from the server to the global attribute 'books'
+                    books = resBooks;
+                    const table = document.querySelector("#tableBody");
+                    // clean the book list by removing each HTML child element
+                    while (table.firstChild) {
+                        table.removeChild(table.lastChild);
+                    }
+                    // iterates each book of the list and add to the table
+                    books.forEach((book, i) => {
+                        addBook(book, i, table);
+                    })
+                }).catch(err => console.error(`error GET /book: ${err.message}`));
         }
 
         init();
