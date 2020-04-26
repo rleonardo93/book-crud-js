@@ -118,17 +118,35 @@
             let fields = e.target.elements;
             // validate if the 'title' and 'author' fields are not empty
             if (hasValue(fields['title'].value) && hasValue(fields['author'].value)) {
+                
+                // if the form has an _id means that we are updating 
+                const notNew = hasValue(fields['_id'].value);
+                console.log(notNew);
+                
                 // create an object with the form data
                 const book = {
-                    _id: "123",
+                    _id: (notNew ? fields['_id'].value : ""),
                     title: fields['title'].value,
                     collection: fields['collection'].value,
                     author: fields['author'].value,
                     publish_year: fields['publish_year'].value
                 }
+
                 const table = document.querySelector("#tableBody");
-                // add a new row with the book data in the end of the table
-                addBook(book, table.childNodes.length, table);
+
+                if (notNew) {
+                    // search for the table row wich belongs the updated book
+                    let row = getRowById(book._id, table);
+                    console.log(row);
+                    // set each attribute of the book to the relative column
+                    row.childNodes[1].innerHTML = book.title;
+                    row.childNodes[2].innerHTML = book.collection;
+                    row.childNodes[3].innerHTML = book.author;
+                    row.childNodes[4].innerHTML = book.publish_year;
+                } else {
+                    // add a new row with the book data in the end of the table
+                    addBook(book, table.childNodes.length, table);
+                }
             }
             // clean the form fields
             fields['_id'].value = "";
@@ -159,6 +177,16 @@
             form.elements['publish_year'].value = book.publish_year;
             // open the form modal
             $("#createModal").modal();
+        }
+
+        function getRowById(id, table) {
+            let row;
+            table.childNodes.forEach((node, i) => {
+                if (node.childNodes[0].textContent === id) {
+                    row = node;
+                }
+            });
+            return row;
         }
 
         init();
