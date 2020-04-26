@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crud using JavaScript</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>    
 </head>
@@ -34,7 +35,7 @@
             <!-- Modal content -->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1>Add a Book</h1>
+                    <h1 id="actionType"></h1>
                 </div>
                 <div class="modal-body">
                     <form id="form">
@@ -69,17 +70,18 @@
         </div>
     </div>
     <script>
+        // array to save the books
         var books = [];
 
         function init(){
-            const table = document.querySelector("#tableBody");
+            const table = document.querySelector("#tableBody");            
             // iterates each book of the list and add to the table
             books.forEach((book, i) => {
                 addBook(book, i, table);
             });
 
             var form = document.getElementById("form");
-            form.addEventListener("submit", setBook);
+            form.addEventListener("submit", setBook);            
         }
 
         function addBook(book, index, table) {
@@ -91,6 +93,15 @@
             addField(book.collection, row);
             addField(book.author, row);
             addField(book.publish_year, row);
+            // add the actions
+            addField(`
+                <button type="button" class="btn btn-outline-dark" onclick="openBookForm(${index})">
+                    <i class="fa fa-edit"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger" onclick="removeBook('${book._id}')">
+                    <i class="fa fa-trash"></i>
+                </button>
+            `, row);
             // add the row to the table
             table.appendChild(row);
 
@@ -105,18 +116,16 @@
         function setBook(e) {
             e.preventDefault();
             let fields = e.target.elements;
-            console.log(fields);
             // validate if the 'title' and 'author' fields are not empty
             if (hasValue(fields['title'].value) && hasValue(fields['author'].value)) {
                 // create an object with the form data
                 const book = {
-                    _id: "",
+                    _id: "123",
                     title: fields['title'].value,
                     collection: fields['collection'].value,
                     author: fields['author'].value,
                     publish_year: fields['publish_year'].value
                 }
-
                 const table = document.querySelector("#tableBody");
                 // add a new row with the book data in the end of the table
                 addBook(book, table.childNodes.length, table);
@@ -135,6 +144,21 @@
 
         function hasValue(value) {
             return value.length > 0;
+        }
+
+        function openBookForm(index) {
+            // get the book to be updated
+            const book = books[index];
+            console.log(book);
+            // set the book attributes to the respective form input fields
+            const form = document.querySelector("#form");
+            form.elements['_id'].value = book._id;
+            form.elements['title'].value = book.title;
+            form.elements['collection'].value = book.collection;
+            form.elements['author'].value = book.author;
+            form.elements['publish_year'].value = book.publish_year;
+            // open the form modal
+            $("#createModal").modal();
         }
 
         init();
