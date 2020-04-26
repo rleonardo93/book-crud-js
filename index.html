@@ -75,12 +75,6 @@
         const serverURL = "https://ti2-aux-2020.eu-gb.mybluemix.net";
 
         function init(){
-            // const table = document.querySelector("#tableBody");            
-            // // iterates each book of the list and add to the table
-            // books.forEach((book, i) => {
-            //     addBook(book, i, table);
-            // });
-
             var form = document.getElementById("form");
             form.addEventListener("submit", setBook);
 
@@ -122,42 +116,33 @@
             // validate if the 'title' and 'author' fields are not empty
             if (hasValue(fields['title'].value) && hasValue(fields['author'].value)) {
                 
-                // if the form has an _id means that we are updating 
-                const notNew = hasValue(fields['_id'].value);
-                
                 // create an object with the form data
                 const book = {
-                    _id: (notNew ? fields['_id'].value : ""),
-                    title: fields['title'].value,
-                    collection: fields['collection'].value,
-                    author: fields['author'].value,
-                    publish_year: fields['publish_year'].value
+                    "title": fields['title'].value,
+                    "collection": fields ['collection'].value,
+                    "author": fields['author'].value,
+                    "publish_year": fields['publish_year'].value
                 }
 
-                const table = document.querySelector("#tableBody");
-
-                if (notNew) {
-                    // search for the table row wich belongs the updated book
-                    let row = getRowById(book._id, table);
-                    console.log(row);
-                    // set each attribute of the book to the relative column
-                    row.childNodes[1].innerHTML = book.title;
-                    row.childNodes[2].innerHTML = book.collection;
-                    row.childNodes[3].innerHTML = book.author;
-                    row.childNodes[4].innerHTML = book.publish_year;
+                // define the route and method
+                let route, method;
+                // if the form has an _id means that we are updating a existing book, so we use: PUT /book/:id
+                if (hasValue(fields['_id'].value)) {
+                    route = `/book/${fields['_id'].value}`;
+                    method = "PUT";
                 } else {
-                    // add a new row with the book data in the end of the table
-                    addBook(book, table.childNodes.length, table);
+                    // if we are not creatinga a book, so we use POST /book
+                    route = "/book";
+                    method = "POST";
                 }
+                console.log("fetch", serverURL + route);
+                //submit the form
+                fetch(serverURL + route, { method, body: JSON.stringify(book), headers: { 'Content-Type': 'application/json' } })
+                    .then(res => updateBookList()) // After the form being submmited we refresh the list
+                    .catch(err => console.error(`error ${method} ${route}: ${err.message}`))
             }
-            // clean the form fields
-            fields['_id'].value = "";
-            fields['title'].value = "";
-            fields['collection'].value = "";
-            fields['author'].value = "";
-            fields['publish_year'].value = "";
             // close the form modal
-            $("#createModal").modal("hide");
+            $("#createModal").modal("hide");            
         }
 
         function hasValue(value) {
@@ -188,10 +173,14 @@
             return row;
         }
 
-        function removeBook(bookId) {
-            const table = document.querySelector("#tableBody");
-            // remove the HTML child element (row) from the table by the relative book id
-            getRowById(bookId, table).remove();
+        function removeBook(index) {
+            // get the _id of the book to be updated
+            const bookId = books[index]._id;
+            // submit the order to remove the book, so we use:
+            // DELETE /book/:id
+            fetch(`${serverURL}/book/${bookId}`, { method: "DELETE" })
+                .then(res => updateBookList()) // After the form being successfuly removed we refresh the list
+                .catch(err => console.error(`error DELETE /book/${bookId} : ${errorMessage}`))
         }
 
         function updateBookList() {
