@@ -189,6 +189,12 @@
             return row;
         }
 
+        function removeBook(bookId) {
+            const table = document.querySelector("#tableBody");
+            // remove the HTML child element (row) from the table by the relative book id
+            getRowById(bookId, table).remove();
+        }
+
         init();
     </script>
 </body>
