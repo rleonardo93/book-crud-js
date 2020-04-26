@@ -9,51 +9,63 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>    
 </head>
 <body>
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Collection</th>
-                <th>Author</th>
-                <th>Published</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-
-    <div class="modal-content">
-        <div class="modal-header">
-            <h1>Add a Book</h1>
-        </div>
-        <div class="modal-body">
-            <form id="form">
-                <input type="hidden" id="_id" name="_id">
+    <div class="container">
+        <h1>Books</h1>
+        <hr>
+        <!-- Open Modal for create a new book-->
+        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#createModal">Add book</button>
+        <!-- List all books -->
+        <table id="tblBooks" style="display: none">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Title</th>
+                    <th>Collection</th>
+                    <th>Author</th>
+                    <th>Published</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+    <!-- Modal-->
+    <div id="createModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Add a Book</h1>
+                </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label form="title">Title:</label>
-                        <input class="form-control" id="title" name="title">
-                    </div>
-                    <div class="form-group">
-                        <label form="collection">Collection:</label>
-                        <input class="form-control" id="collection" name="collection">
-                    </div>
-                    <div class="form-group">
-                        <label form="author">Author:</label>
-                        <input class="form-control" id="author" name="author">
-                    </div>
-                    <div class="form-group">
-                        <label form="published">Published:</label>
-                        <input class="form-control" id="published" name="published">
-                    </div>
+                    <form id="form">
+                        <input type="hidden" id="_id" name="_id">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label form="title">Title:</label>
+                                <input class="form-control" id="title" name="title">
+                            </div>
+                            <div class="form-group">
+                                <label form="collection">Collection:</label>
+                                <input class="form-control" id="collection" name="collection">
+                            </div>
+                            <div class="form-group">
+                                <label form="author">Author:</label>
+                                <input class="form-control" id="author" name="author">
+                            </div>
+                            <div class="form-group">
+                                <label form="published">Published:</label>
+                                <input type="number" class="form-control" id="published" name="publish_year">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>            
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
-            </form>            
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
     <script>
@@ -64,7 +76,10 @@
             // iterates each book of the list and add to the table
             books.forEach((book, i) => {
                 addBook(book, i, table);
-            });    
+            });
+
+            var form = document.getElementById("form");
+            form.addEventListener("submit", setBook);
         }
 
         function addBook(book, index, table) {
@@ -86,6 +101,42 @@
             column.innerHTML = field ? field : "-";
             row.appendChild(column);
         }
+
+        function setBook(e) {
+            e.preventDefault();
+            let fields = e.target.elements;
+            console.log(fields);
+            // validate if the 'title' and 'author' fields are not empty
+            if (hasValue(fields['title'].value) && hasValue(fields['author'].value)) {
+                // create an object with the form data
+                const book = {
+                    _id: "",
+                    title: fields['title'].value,
+                    collection: fields['collection'].value,
+                    author: fields['author'].value,
+                    publish_year: fields['publish_year'].value
+                }
+
+                const table = document.querySelector("#tableBody");
+                // add a new row with the book data in the end of the table
+                addBook(book, table.childNodes.length, table);
+            }
+            // clean the form fields
+            fields['_id'].value = "";
+            fields['title'].value = "";
+            fields['collection'].value = "";
+            fields['author'].value = "";
+            fields['publish_year'].value = "";
+            // close the form modal
+            $("#createModal").modal("hide");
+            // show the list of books
+            $("#tblBooks").show();
+        }
+
+        function hasValue(value) {
+            return value.length > 0;
+        }
+
         init();
     </script>
 </body>
